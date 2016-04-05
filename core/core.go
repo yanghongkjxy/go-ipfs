@@ -18,6 +18,7 @@ import (
 
 	ds "github.com/ipfs/go-ipfs/Godeps/_workspace/src/github.com/ipfs/go-datastore"
 	diag "github.com/ipfs/go-ipfs/diagnostics"
+	pubsub "github.com/ipfs/go-libp2p-pubsub"
 	mamask "gx/ipfs/QmPwfFAHUmvWDucLHRS9Xz2Kb1TNX2cY4LJ7pQjg9kVcae/multiaddr-filter"
 	goprocess "gx/ipfs/QmQopLATEYMNg7dVqZRNDfeE2S1yKy8zrRh5xnYiuqeZBn/goprocess"
 	b58 "gx/ipfs/QmT8rehPR3F6bmwL6zjUN8XpiDBFFpMP2myPdC6ApsWfJf/go-base58"
@@ -110,6 +111,7 @@ type IpfsNode struct {
 	Ping         *ping.PingService
 	Reprovider   *rp.Reprovider // the value reprovider system
 	IpnsRepub    *ipnsrp.Republisher
+	PubSub       *pubsub.TopicManager
 
 	proc goprocess.Process
 	ctx  context.Context
@@ -161,6 +163,8 @@ func (n *IpfsNode) startOnlineServices(ctx context.Context, routingOption Routin
 	if err := n.startOnlineServicesWithHost(ctx, peerhost, routingOption); err != nil {
 		return err
 	}
+
+	n.PubSub = pubsub.NewTopicManager(peerhost)
 
 	// Ok, now we're ready to listen.
 	if err := startListening(ctx, n.PeerHost, cfg); err != nil {
